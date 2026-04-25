@@ -1,0 +1,36 @@
+package com.sibanarayan.submission.entities;
+
+import com.sibanarayan.submission.enums.ProgrammingLanguage;
+import com.sibanarayan.submission.enums.SubmissionStatus;
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.util.UUID;
+
+@Entity
+@Table(name="submission")
+@Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class Submission extends  Base {
+    @Column(name="user_id",nullable = false,updatable = false)
+    private UUID userId;
+
+    @Column(name="problem_id",nullable = false,updatable = false)
+    private UUID problemId;
+
+    @Column(name="programming_language",nullable = false)
+    @Enumerated(EnumType.STRING)
+    private ProgrammingLanguage language;
+
+    @Column(name="solution")
+    private String solution;
+
+    @Column(name="status")
+    @Enumerated(EnumType.STRING)
+    private SubmissionStatus status;
+
+
+}
