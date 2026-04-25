@@ -29,6 +29,5 @@ spring:
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
         spring.json.trusted.packages: "com.sibanarayan.submission.events"
-        spring.json.value.default.type: "com.sibanarayan.submission.events.SubmissionEvent"
 server:
   port: 8082

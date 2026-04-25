@@ -4,12 +4,13 @@ import com.sibanarayan.submission.enums.ProgrammingLanguage;
 import com.sibanarayan.submission.enums.SubmissionStatus;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.util.UUID;
 
 @Entity
 @Table(name="submission")
-@Builder
+@SuperBuilder
 @Getter
 @Setter
 @NoArgsConstructor

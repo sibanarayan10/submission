@@ -3,6 +3,7 @@ package com.sibanarayan.submission.entities;
 import com.sibanarayan.submission.enums.RecordStatus;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -12,6 +13,7 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@SuperBuilder
 public class Base {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
