@@ -1,0 +1,21 @@
+package com.sibanarayan.submission.events;
+
+import com.sibanarayan.submission.enums.SubmissionStatus;
+import lombok.*;
+
+import java.time.Instant;
+import java.util.UUID;
+
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class JudgeResultEvent {
+    private UUID submissionId;
+    private SubmissionStatus status;
+    private Integer runtimeMs;
+    private Integer memoryKb;
+    private String errorMessage;
+    private Instant occurredAt;
+}

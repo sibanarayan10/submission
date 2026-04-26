@@ -2,5 +2,10 @@ package com.sibanarayan.submission.enums;
 
 public enum SubmissionStatus {
     PENDING,
-    SOLVED
+    QUEUED,
+    RUNNING,
+    ACCEPTED,
+    RUNTIME_ERROR,
+    TIME_LIMIT_EXCEEDED,
+    WRONG_ANSWER
 }

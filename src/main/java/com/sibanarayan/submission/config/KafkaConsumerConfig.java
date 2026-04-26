@@ -20,10 +20,11 @@ public class KafkaConsumerConfig {
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
 
-    private <T> ConcurrentKafkaListenerContainerFactory<String, T> factory(Class<T> targetType) {
+    private <T> ConcurrentKafkaListenerContainerFactory<String, T> factory(Class<T> targetType,String groupId) {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
         props.put(JsonDeserializer.TRUSTED_PACKAGES, "com.sibanarayan.submission.events");
         props.put(JsonDeserializer.VALUE_DEFAULT_TYPE, targetType.getName());
@@ -41,12 +42,18 @@ public class KafkaConsumerConfig {
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, ProblemEvent>
     problemEventFactory() {
-        return factory(ProblemEvent.class);
+        return factory(ProblemEvent.class,"submission-service-problem");
     }
 
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, SubmissionEvent>
     judgeResultFactory() {
-        return factory(SubmissionEvent.class);
+        return factory(SubmissionEvent.class,"submission-service-judge");
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, SubmissionEvent>
+    submissionEventFactory() {
+        return factory(SubmissionEvent.class, "submission-service-judge");
     }
 }

@@ -1,99 +1,89 @@
 package com.sibanarayan.submission.consumers;
 
-import com.sibanarayan.submission.enums.ProgrammingLanguage;
+import com.sibanarayan.submission.enums.SubmissionStatus;
+import com.sibanarayan.submission.events.JudgeResultEvent;
 import com.sibanarayan.submission.events.SubmissionEvent;
+import com.sibanarayan.submission.httpClients.CoreServiceClient;
+import com.sibanarayan.submission.models.response.TestCaseResponse;
+import com.sibanarayan.submission.repositories.SubmissionRepositories;
+import com.sibanarayan.submission.service.impl.JudgeServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
-import java.io.*;
-import java.util.concurrent.TimeUnit;
+
+import java.time.Instant;
+import java.util.List;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class SubmissionConsumer {
 
+    private final CoreServiceClient coreServiceClient;
+    private final JudgeServiceImpl judgeService;
+    private final SubmissionRepositories submissionRepository;
+    private final KafkaTemplate<String, JudgeResultEvent> kafkaTemplate;
+
+    private static final String RESULT_TOPIC = "judge.results";
+
     @KafkaListener(
-            topics = "submission.events",
-            groupId = "submission-service"
+            topics = "submission.pending",
+            groupId = "submission-service-judge",
+            containerFactory = "submissionEventFactory"
     )
     public void consume(SubmissionEvent event) {
-        try{
-            File codeFile=createFile(event.getSolution(),event.getLanguage());
-            switch (event.getLanguage()){
-                case PYTHON ->handlePythonSubmission(codeFile,event.getSolution());
+        log.info("Received submission event for submissionId: {}",
+                event.getSubmissionId());
+
+        // mark as QUEUED
+        updateStatus(event.getSubmissionId(), SubmissionStatus.QUEUED);
+
+        JudgeResultEvent result;
+
+        try {
+            List<TestCaseResponse> testCases =
+                    coreServiceClient.getTestCases(event.getProblemId());
+
+            if (testCases.isEmpty()) {
+                log.warn("No test cases found for problem {}", event.getProblemId());
+                result = JudgeResultEvent.builder()
+                        .submissionId(event.getSubmissionId())
+                        .status(SubmissionStatus.RUNTIME_ERROR)
+                        .errorMessage("No test cases available for this problem")
+                        .occurredAt(Instant.now())
+                        .build();
+            } else {
+                // mark as RUNNING
+                updateStatus(event.getSubmissionId(), SubmissionStatus.RUNNING);
+                result = judgeService.judge(event, testCases);
             }
 
-        }catch (Exception e){
-
+        } catch (Exception e) {
+            log.error("Unexpected error processing submission {}",
+                    event.getSubmissionId(), e);
+            result = JudgeResultEvent.builder()
+                    .submissionId(event.getSubmissionId())
+                    .status(SubmissionStatus.RUNTIME_ERROR)
+                    .errorMessage("Internal error: " + e.getMessage())
+                    .occurredAt(Instant.now())
+                    .build();
         }
+
+        // publish result to judge.results
+        kafkaTemplate.send(RESULT_TOPIC,
+                event.getSubmissionId().toString(), result);
+
+        log.info("Published result for submission {}: {}",
+                event.getSubmissionId(), result.getStatus());
     }
 
-
-
-    private File createFile(String code, ProgrammingLanguage language) throws IOException {
-        String extension="";
-        switch (language){
-            case PYTHON ->
-                extension=".py";
-
-            case JAVA ->
-                extension=".java";
-
-            case JAVASCRIPT ->
-                extension=".js";
-
-            default->
-                extension=".txt";
-
-        }
-
-        File file = File.createTempFile("submission_", extension);
-        try (FileWriter writer = new FileWriter(file)) {
-            writer.write(code);
-        }
-        return file;
-    }
-
-    public static String handlePythonSubmission(File codeFile, String input) throws Exception {
-
-        String containerName = "judge_" + System.currentTimeMillis();
-
-        ProcessBuilder pb = new ProcessBuilder(
-                "docker", "run", "--rm",
-                "--memory=100m",
-                "--cpus=0.5",
-                "--network=none",
-                "-v", codeFile.getAbsolutePath() + ":/app/Main.py",
-                "judge-python",
-                "python", "/app/Main.py"
-        );
-
-        Process process = pb.start();
-
-        try (BufferedWriter writer = new BufferedWriter(
-                new OutputStreamWriter(process.getOutputStream()))) {
-            writer.write(input);
-            writer.flush();
-        }
-
-        BufferedReader reader = new BufferedReader(
-                new InputStreamReader(process.getInputStream()));
-
-        StringBuilder output = new StringBuilder();
-        String line;
-
-        while ((line = reader.readLine()) != null) {
-            output.append(line).append("\n");
-        }
-
-        boolean finished = process.waitFor(2, TimeUnit.SECONDS);
-        if (!finished) {
-            process.destroyForcibly();
-            throw new RuntimeException("TIME_LIMIT_EXCEEDED");
-        }
-
-        return output.toString().trim();
+    private void updateStatus(UUID submissionId, SubmissionStatus status) {
+        submissionRepository.findById(submissionId).ifPresent(submission -> {
+            submission.setStatus(status);
+            submissionRepository.save(submission);
+        });
     }
 }

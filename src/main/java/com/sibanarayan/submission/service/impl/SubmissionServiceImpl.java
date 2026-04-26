@@ -27,7 +27,7 @@ public class SubmissionServiceImpl implements SubmissionService {
     private ProblemSnapshotRepository problemSnapshotRepository;
     private KafkaTemplate<String, SubmissionEvent> kafkaTemplate;
 
-    private final String SUBMISSION_TOPIC="submission.event";
+    private final String SUBMISSION_TOPIC="submission.pending";
     public UUID createOrEditSubmission(SubmissionRequest request){
         Submission submission=new Submission();
         validateUserAndProblem(request);
@@ -40,6 +40,7 @@ public class SubmissionServiceImpl implements SubmissionService {
                      .status(SubmissionStatus.PENDING)
                     .build();
             submissionRepositories.save(submission);
+            publishEvent(submission,request.getProblemId());
             log.info("Submission created successfully");
         }
 
@@ -50,6 +51,7 @@ public class SubmissionServiceImpl implements SubmissionService {
                             problemId(problemId)
                                     .language(submission.getLanguage())
                                             .solution(submission.getSolution())
+                                                 .submissionId(submission.getId())
                                                     .build();
         kafkaTemplate.send(SUBMISSION_TOPIC, submission.toString(), event)
                 .whenComplete((result, ex) -> {
@@ -64,10 +66,10 @@ public class SubmissionServiceImpl implements SubmissionService {
       UUID userId=request.getUserId();
       UUID problemId=request.getProblemId();
 
-      if(!userSnapshotRepository.existsByIdAndRecordStatus(userId,RecordStatus.ACTIVE)){
-          throw new EntityNotFoundException("User not found");
-      }
-      if(!problemSnapshotRepository.existsByIdAndRecordStatus(problemId,RecordStatus.ACTIVE)){
+//      if(!userSnapshotRepository.existsByIdAndRecordStatus(userId,RecordStatus.ACTIVE)){
+//          throw new EntityNotFoundException("User not found");
+//      }
+      if(!problemSnapshotRepository.existsByProblemIdAndRecordStatus(problemId,RecordStatus.ACTIVE)){
           throw new EntityNotFoundException("Problem not found");
       }
   }
