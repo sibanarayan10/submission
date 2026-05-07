@@ -33,5 +33,13 @@ public class Submission extends  Base {
     @Enumerated(EnumType.STRING)
     private SubmissionStatus status;
 
+    @Column(name="error_message")
+    private String errorMessage;
+
+    @Column(name="runtime_ms")
+    private Integer runtimeMs;
+
+    @Column(name="memory")
+    private Integer memoryKb;
 
 }
