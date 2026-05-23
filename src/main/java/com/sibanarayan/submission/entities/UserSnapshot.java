@@ -1,25 +1,37 @@
 package com.sibanarayan.submission.entities;
 
+import com.sibanarayan.submission.enums.RecordStatus;
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @Entity
 @Table(name="user_snapshot")
 @Setter
 @Getter
-@SuperBuilder
-public class UserSnapshot extends  Base {
-    @Column(name="user_id",nullable = false,updatable = false,insertable = false)
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class UserSnapshot{
+    @Column(name="user_id",nullable = false,updatable = false,insertable = false,unique = true)
+    @Id
     private UUID userId;
 
-    @Column(name="user_id",nullable = false)
-    private UUID email;
+    @Column(name="email",nullable = false)
+    private String email;
 
-    @Column(name="user_name",nullable = false)
-    private String userName;
+    @Column(name="name",nullable = false)
+    private String name;
+
+    @Column(name="created_at",nullable = false,updatable = false)
+    private Instant createdAt;
+
+    @Column(name="record_status")
+    @Enumerated(EnumType.STRING)
+    private RecordStatus recordStatus;
+
+
 }

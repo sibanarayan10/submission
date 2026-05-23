@@ -34,7 +34,7 @@ public class CoreServiceClient {
     public List<TestCaseResponse> getTestCases(UUID problemId) {
         try {
             ResponseEntity<List<TestCaseResponse>> response = restTemplate.exchange(
-                    url + "/api/v1/problems/" + problemId + "/testCases",
+                    url + "/api/v1/problems/" + problemId + "/testCases/all",
                     HttpMethod.GET,
                     null,
                     new ParameterizedTypeReference<>() {}

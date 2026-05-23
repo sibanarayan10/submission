@@ -3,6 +3,7 @@ package com.sibanarayan.submission.config;
 import com.sibanarayan.submission.events.JudgeResultEvent;
 import com.sibanarayan.submission.events.ProblemEvent;
 import com.sibanarayan.submission.events.SubmissionEvent;
+import com.sibanarayan.submission.events.UserEvent;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -55,6 +56,12 @@ public class KafkaConsumerConfig {
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, SubmissionEvent>
     submissionEventFactory() {
-        return factory(SubmissionEvent.class, "submission-service-judge");
+        return factory(SubmissionEvent.class, "submission-service-submission");
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, UserEvent>
+    userEventFactory() {
+        return factory(UserEvent.class, "submission-service-user");
     }
 }

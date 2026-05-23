@@ -23,9 +23,9 @@ public class JudgeResultConsumer {
         submissionRepository.findById(event.getSubmissionId())
                 .ifPresentOrElse(submission -> {
                     submission.setStatus(event.getStatus());
-                    submission.setRuntimeMs(event.getRuntimeMs());
-                    submission.setMemoryKb(event.getMemoryKb());
                     submission.setErrorMessage(event.getErrorMessage());
+                    submission.setTotal(event.getTotal());
+                    submission.setPassed(event.getPassed());
                     submissionRepository.save(submission);
                     log.info("Submission {} updated with status {}",
                             event.getSubmissionId(), event.getStatus());

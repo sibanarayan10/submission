@@ -21,8 +21,8 @@ public class ProblemConsumer {
                     containerFactory = "problemEventFactory")
     public void consume(ProblemEvent event){
         switch (event.getEventType()){
-            case PROBLEM_CREATED -> handleProblemCreation(event);
-            case PROBLEM_DELETED -> handleProblemDeletion(event);
+            case CREATE -> handleProblemCreation(event);
+            case DELETE -> handleProblemDeletion(event);
 
         }
     }
@@ -36,7 +36,9 @@ public class ProblemConsumer {
         ProblemSnapshot snapshot = ProblemSnapshot.builder()
                 .problemId(event.getProblemId())
                 .title(event.getTitle())
-                .createdAt(event .getOccurredAt())
+                .createdAt(event.getOccurredAt())
+                .recordStatus(RecordStatus.ACTIVE)
+                .ioByLanguage(event.getIoByLanguage())
                 .build();
 
         problemSnapshotRepository.save(snapshot);

@@ -1,21 +1,33 @@
 package com.sibanarayan.submission.entities;
 
 import com.sibanarayan.submission.enums.ProgrammingLanguage;
+import com.sibanarayan.submission.enums.RecordStatus;
 import com.sibanarayan.submission.enums.SubmissionStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @Entity
 @Table(name="submission")
-@SuperBuilder
+@Builder
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Submission extends  Base {
+public class Submission {
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    public UUID id;
+
+    @Column(name="created_at",nullable = false)
+    private Instant createdAt;
+
+    @Column(name="updated_at",nullable = false)
+    private Instant updatedAt;
+
     @Column(name="user_id",nullable = false,updatable = false)
     private UUID userId;
 
@@ -36,10 +48,19 @@ public class Submission extends  Base {
     @Column(name="error_message")
     private String errorMessage;
 
-    @Column(name="runtime_ms")
-    private Integer runtimeMs;
+    @Column(name="total")
+    private Integer total ;
 
-    @Column(name="memory")
-    private Integer memoryKb;
+    @Column(name="passed")
+    private Integer passed;
+
+    @PrePersist
+    protected void onCreate(){
+        createdAt=updatedAt=Instant.now();
+    }
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = Instant.now();
+    }
 
 }

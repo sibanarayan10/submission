@@ -29,7 +29,12 @@ spring:
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
         spring.json.trusted.packages: "com.sibanarayan.submission.events"
+
+  cors:
+    allowed-origins: http://localhost:5173
 server:
   port: 8082
 core_service:
   url: http://localhost:8083
+
+

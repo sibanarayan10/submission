@@ -16,6 +16,8 @@ public class JudgeResultEvent {
     private SubmissionStatus status;
     private Integer runtimeMs;
     private Integer memoryKb;
+    private Integer passed;
+    private Integer total;
     private String errorMessage;
     private Instant occurredAt;
 }

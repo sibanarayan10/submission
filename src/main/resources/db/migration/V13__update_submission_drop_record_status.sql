@@ -1,0 +1,4 @@
+ALTER TABLE submission
+DROP COLUMN record_status,
+ADD COLUMN total INTEGER,
+ADD COLUMN passed INTEGER;

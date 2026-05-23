@@ -31,14 +31,13 @@ public class SubmissionConsumer {
 
     @KafkaListener(
             topics = "submission.pending",
-            groupId = "submission-service-judge",
+            groupId = "submission-service-submission",
             containerFactory = "submissionEventFactory"
     )
     public void consume(SubmissionEvent event) {
         log.info("Received submission event for submissionId: {}",
                 event.getSubmissionId());
 
-        // mark as QUEUED
         updateStatus(event.getSubmissionId(), SubmissionStatus.QUEUED);
 
         JudgeResultEvent result;
@@ -56,7 +55,6 @@ public class SubmissionConsumer {
                         .occurredAt(Instant.now())
                         .build();
             } else {
-                // mark as RUNNING
                 updateStatus(event.getSubmissionId(), SubmissionStatus.RUNNING);
                 result = judgeService.judge(event, testCases);
             }
@@ -86,4 +84,5 @@ public class SubmissionConsumer {
             submissionRepository.save(submission);
         });
     }
+
 }

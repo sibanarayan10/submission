@@ -6,6 +6,7 @@ import com.sibanarayan.submission.enums.SubmissionStatus;
 import com.sibanarayan.submission.events.SubmissionEvent;
 import com.sibanarayan.submission.exceptions.EntityNotFoundException;
 import com.sibanarayan.submission.models.request.SubmissionRequest;
+import com.sibanarayan.submission.models.response.SubmissionResponse;
 import com.sibanarayan.submission.repositories.ProblemSnapshotRepository;
 import com.sibanarayan.submission.repositories.SubmissionRepositories;
 import com.sibanarayan.submission.repositories.UserSnapshotRepository;
@@ -15,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -46,6 +48,25 @@ public class SubmissionServiceImpl implements SubmissionService {
 
         return submission.getId();
     }
+    public List<SubmissionResponse> getSubmissions(UUID userId,UUID problemId){
+        validateProblem(problemId);
+        return submissionRepositories.findByUserIdAndProblemIdOrderByCreatedAtDesc(userId,problemId)
+                .stream().map(this::mapToResponse)
+                .toList();
+    }
+
+    private SubmissionResponse mapToResponse(Submission submission){
+        return SubmissionResponse.builder()
+                .createdAt(submission.getCreatedAt())
+                .userId(submission.getUserId())
+                .problemId(submission.getProblemId())
+                .status(submission.getStatus())
+                .id(submission.getId())
+                .total(submission.getTotal())
+                .errorMessage(submission.getErrorMessage())
+                .passed(submission.getPassed())
+                .build();
+    }
     private void publishEvent(Submission submission,UUID problemId){
         SubmissionEvent event=SubmissionEvent.builder().
                             problemId(problemId)
@@ -56,19 +77,27 @@ public class SubmissionServiceImpl implements SubmissionService {
         kafkaTemplate.send(SUBMISSION_TOPIC, submission.toString(), event)
                 .whenComplete((result, ex) -> {
                     if (ex != null)
-                        log.error("Failed to publish {} event for problem {}",problemId, ex);
+                        log.error("Failed to publish {} event for problem {}","submission event",problemId, ex);
                     else
-                        log.info("Published {} event for problem {}",problemId);
+                        log.info("Published {} event for problem {}","submission event",problemId);
 
                 });
     }
-  private void validateUserAndProblem(SubmissionRequest request){
+    private void validateUserAndProblem(SubmissionRequest request){
       UUID userId=request.getUserId();
       UUID problemId=request.getProblemId();
 
-//      if(!userSnapshotRepository.existsByIdAndRecordStatus(userId,RecordStatus.ACTIVE)){
-//          throw new EntityNotFoundException("User not found");
-//      }
+        validateProblem(problemId);
+        validateUser(userId);
+      }
+
+  private void validateUser(UUID userId){
+      if(!userSnapshotRepository.existsByUserIdAndRecordStatus(userId,RecordStatus.ACTIVE)){
+          throw new EntityNotFoundException("User not found");
+      }
+  }
+
+  private void validateProblem(UUID problemId){
       if(!problemSnapshotRepository.existsByProblemIdAndRecordStatus(problemId,RecordStatus.ACTIVE)){
           throw new EntityNotFoundException("Problem not found");
       }
