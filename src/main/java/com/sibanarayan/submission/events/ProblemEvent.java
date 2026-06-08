@@ -1,8 +1,7 @@
 package com.sibanarayan.submission.events;
 
-import com.sibanarayan.submission.enums.EventType;
-import com.sibanarayan.submission.enums.ProblemEventType;
-import com.sibanarayan.submission.enums.ProgrammingLanguage;
+import com.sibanarayan.code.enums.EventType;
+import com.sibanarayan.code.enums.ProgrammingLanguage;
 import lombok.*;
 
 import java.time.Instant;

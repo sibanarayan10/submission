@@ -1,9 +1,8 @@
 package com.sibanarayan.submission.entities;
 
-import com.sibanarayan.submission.enums.RecordStatus;
+import com.sibanarayan.code.enums.RecordStatus;
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 
 import java.time.Instant;
 import java.util.UUID;

@@ -1,6 +1,7 @@
 package com.sibanarayan.submission.consumers;
 
-import com.sibanarayan.submission.enums.SubmissionStatus;
+import com.sibanarayan.code.enums.SubmissionStatus;
+import com.sibanarayan.submission.entities.Submission;
 import com.sibanarayan.submission.events.JudgeResultEvent;
 import com.sibanarayan.submission.events.SubmissionEvent;
 import com.sibanarayan.submission.httpClients.CoreServiceClient;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -26,6 +28,7 @@ public class SubmissionConsumer {
     private final JudgeServiceImpl judgeService;
     private final SubmissionRepositories submissionRepository;
     private final KafkaTemplate<String, JudgeResultEvent> kafkaTemplate;
+    private final SimpMessagingTemplate simpMessagingTemplate;
 
     private static final String RESULT_TOPIC = "judge.results";
 
@@ -42,9 +45,18 @@ public class SubmissionConsumer {
 
         JudgeResultEvent result;
 
+
         try {
             List<TestCaseResponse> testCases =
                     coreServiceClient.getTestCases(event.getProblemId());
+
+            Submission submission=Submission.builder()
+                            .id(event.getSubmissionId())
+                                    .status(SubmissionStatus.QUEUED)
+                                            .problemId(event.getProblemId()).build();
+
+            simpMessagingTemplate.convertAndSend("/topic/submission/" + event.getSubmissionId(),submission);
+
 
             if (testCases.isEmpty()) {
                 log.warn("No test cases found for problem {}", event.getProblemId());
@@ -69,6 +81,18 @@ public class SubmissionConsumer {
                     .occurredAt(Instant.now())
                     .build();
         }
+
+
+        Submission response=Submission.builder()
+                                .problemId(event.getProblemId())
+                                .createdAt(result.getOccurredAt())
+                                .errorMessage(result.getErrorMessage())
+                                .status(result.getStatus())
+                                .passed(result.getPassed())
+                                .total(result.getTotal())
+                                .runtimeMs(result.getRuntimeMs())
+                                .build();
+        simpMessagingTemplate.convertAndSend("/topic/submission/" + event.getSubmissionId(),response);
 
         // publish result to judge.results
         kafkaTemplate.send(RESULT_TOPIC,

@@ -32,4 +32,5 @@ public class SubmissionController {
         UUID userId=utility.getUserId(token);
         return new ResponseEntity<>(submissionService.getSubmissions(userId,problemId), HttpStatus.ACCEPTED);
     }
+
 }

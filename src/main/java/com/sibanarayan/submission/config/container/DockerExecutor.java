@@ -1,6 +1,6 @@
-package com.sibanarayan.submission.executor;
+package com.sibanarayan.submission.config.container;
 
-import com.sibanarayan.submission.enums.ProgrammingLanguage;
+import com.sibanarayan.code.enums.ProgrammingLanguage;
 import com.sibanarayan.submission.models.ExecutionResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -36,9 +36,8 @@ public class DockerExecutor {
                 "--cpus=" + cpus,
                 "--network=none",
                 image,
-                "sh",
-                "-c",
-                "mkdir -p /app && sleep infinity"
+                "sleep",
+                "infinity"
         );
         pb.redirectErrorStream(false);
         Process process = pb.start();
@@ -51,6 +50,7 @@ public class DockerExecutor {
 
         String containerId = new String(process.getInputStream().readAllBytes()).trim();
         log.info("Started container: {}", containerId);
+        createAppDirectory(containerId);
         return containerId;
     }
 
@@ -73,7 +73,26 @@ public class DockerExecutor {
         }
         log.info("Copied code file to container {}", containerId);
     }
+    public void compile(String containerId, ProgrammingLanguage language)
+            throws IOException, InterruptedException {
 
+        if (language != ProgrammingLanguage.JAVA) return; // Python needs no compilation
+
+        ProcessBuilder pb = new ProcessBuilder(
+                "docker", "exec", containerId,
+                "sh", "-c", "javac /app/Submission.java"
+        );
+        pb.redirectErrorStream(true);
+        Process process = pb.start();
+
+        boolean finished = process.waitFor(30, TimeUnit.SECONDS);
+        String output = new String(process.getInputStream().readAllBytes());
+
+        if (!finished || process.exitValue() != 0) {
+            throw new IOException("Compilation failed: " + output);
+        }
+        log.info("Compilation successful for container {}", containerId);
+    }
     public ExecutionResult executeFile(String containerId, ProgrammingLanguage language, String input) {
         long startTime = System.currentTimeMillis();
 
@@ -176,6 +195,20 @@ public class DockerExecutor {
         }
     }
 
+    public void cleanWorkDir(String containerId) throws IOException, InterruptedException {
+        ProcessBuilder pb = new ProcessBuilder(
+                "docker", "exec", containerId,
+                "sh", "-c", "rm -f /app/Submission.java /app/Submission.class /app/Submission.py"
+        );
+        pb.redirectErrorStream(true);
+        Process process = pb.start();
+        boolean finished = process.waitFor(5, TimeUnit.SECONDS);
+        if (!finished || process.exitValue() != 0) {
+            String err = new String(process.getInputStream().readAllBytes());
+            throw new IOException("Failed to clean container workspace: " + err);
+        }
+        log.debug("Cleaned workspace in container {}", containerId);
+    }
     public void destroy(String containerId) {
         try {
             ProcessBuilder pb = new ProcessBuilder(
@@ -192,6 +225,25 @@ public class DockerExecutor {
         } catch (Exception e) {
             log.error("Failed to remove container {}, it may be leaking", containerId, e);
         }
+    }
+
+    private void createAppDirectory(String containerId)
+            throws IOException, InterruptedException {
+
+        ProcessBuilder pb = new ProcessBuilder(
+                "docker", "exec", containerId,
+                "mkdir", "-p", "/app"
+        );
+        pb.redirectErrorStream(true);
+        Process process = pb.start();
+
+        boolean finished = process.waitFor(10, TimeUnit.SECONDS);
+        if (!finished || process.exitValue() != 0) {
+            String err = new String(process.getInputStream().readAllBytes());
+            throw new IOException("Failed to create /app directory: " + err);
+        }
+
+        log.info("Created /app directory in container {}", containerId);
     }
 
     private String getImage(ProgrammingLanguage language) {
@@ -213,7 +265,7 @@ public class DockerExecutor {
     private List<String> getRunCommand(ProgrammingLanguage language) {
         return switch (language) {
             case PYTHON -> List.of("python3", "/app/Submission.py");
-            case JAVA -> List.of("sh", "-c", "javac /app/Submission.java && java -cp /app Submission");
+            case JAVA -> List.of("java", "-cp", "/app", "Submission"); // no javac here
             default -> new ArrayList<>();
         };
     }

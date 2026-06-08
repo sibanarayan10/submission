@@ -1,10 +1,11 @@
 package com.sibanarayan.submission.service.impl;
 
+import com.sibanarayan.code.enums.RecordStatus;
+import com.sibanarayan.code.enums.SubmissionStatus;
+import com.sibanarayan.code.exceptions.ResourceNotFoundException;
+
 import com.sibanarayan.submission.entities.Submission;
-import com.sibanarayan.submission.enums.RecordStatus;
-import com.sibanarayan.submission.enums.SubmissionStatus;
 import com.sibanarayan.submission.events.SubmissionEvent;
-import com.sibanarayan.submission.exceptions.EntityNotFoundException;
 import com.sibanarayan.submission.models.request.SubmissionRequest;
 import com.sibanarayan.submission.models.response.SubmissionResponse;
 import com.sibanarayan.submission.repositories.ProblemSnapshotRepository;
@@ -55,6 +56,8 @@ public class SubmissionServiceImpl implements SubmissionService {
                 .toList();
     }
 
+
+
     private SubmissionResponse mapToResponse(Submission submission){
         return SubmissionResponse.builder()
                 .createdAt(submission.getCreatedAt())
@@ -64,6 +67,7 @@ public class SubmissionServiceImpl implements SubmissionService {
                 .id(submission.getId())
                 .total(submission.getTotal())
                 .errorMessage(submission.getErrorMessage())
+                .runtimeMs(submission.getRuntimeMs())
                 .passed(submission.getPassed())
                 .build();
     }
@@ -92,14 +96,14 @@ public class SubmissionServiceImpl implements SubmissionService {
       }
 
   private void validateUser(UUID userId){
-      if(!userSnapshotRepository.existsByUserIdAndRecordStatus(userId,RecordStatus.ACTIVE)){
-          throw new EntityNotFoundException("User not found");
+      if(!userSnapshotRepository.existsByUserIdAndRecordStatus(userId, RecordStatus.ACTIVE)){
+          throw new ResourceNotFoundException("User not found");
       }
   }
 
   private void validateProblem(UUID problemId){
       if(!problemSnapshotRepository.existsByProblemIdAndRecordStatus(problemId,RecordStatus.ACTIVE)){
-          throw new EntityNotFoundException("Problem not found");
+          throw new ResourceNotFoundException("Problem not found");
       }
   }
 }

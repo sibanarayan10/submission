@@ -1,6 +1,6 @@
 package com.sibanarayan.submission.events;
 
-import com.sibanarayan.submission.enums.SubmissionStatus;
+import com.sibanarayan.code.enums.SubmissionStatus;
 import lombok.*;
 
 import java.time.Instant;

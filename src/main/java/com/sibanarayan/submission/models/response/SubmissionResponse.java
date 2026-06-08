@@ -1,6 +1,6 @@
 package com.sibanarayan.submission.models.response;
 
-import com.sibanarayan.submission.enums.SubmissionStatus;
+import com.sibanarayan.code.enums.SubmissionStatus;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,4 +20,5 @@ public class SubmissionResponse {
     private Integer passed;
     private Integer total;
     private String errorMessage;
+    private Integer runtimeMs;
 }

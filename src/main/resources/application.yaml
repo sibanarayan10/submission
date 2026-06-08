@@ -9,7 +9,6 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
-    show-sql: true
     open-in-view: false
   flyway:
     enabled: true
@@ -27,9 +26,14 @@ spring:
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      max-poll-records: 10
+      fetch-min-size: 1
+      fetch-max-wait: 500ms
+      enable-auto-commit: false
       properties:
         spring.json.trusted.packages: "com.sibanarayan.submission.events"
-
+      listener:
+        ack-mode: RECORD
   cors:
     allowed-origins: http://localhost:5173
 server:

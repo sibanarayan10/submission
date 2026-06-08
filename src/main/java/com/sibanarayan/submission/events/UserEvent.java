@@ -1,7 +1,7 @@
 package com.sibanarayan.submission.events;
 
 
-import com.sibanarayan.submission.enums.EventType;
+import com.sibanarayan.code.enums.EventType;
 import lombok.*;
 
 import java.time.Instant;

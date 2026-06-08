@@ -1,11 +1,9 @@
 package com.sibanarayan.submission.entities;
 
-import com.sibanarayan.submission.enums.ProgrammingLanguage;
-import com.sibanarayan.submission.enums.RecordStatus;
-import com.sibanarayan.submission.enums.SubmissionStatus;
+import com.sibanarayan.code.enums.ProgrammingLanguage;
+import com.sibanarayan.code.enums.SubmissionStatus;
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -53,6 +51,9 @@ public class Submission {
 
     @Column(name="passed")
     private Integer passed;
+
+    @Column(name="runtime_ms")
+    private Integer runtimeMs;
 
     @PrePersist
     protected void onCreate(){

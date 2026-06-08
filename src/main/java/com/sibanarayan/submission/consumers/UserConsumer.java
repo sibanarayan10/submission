@@ -1,10 +1,10 @@
 package com.sibanarayan.submission.consumers;
 
+import com.sibanarayan.code.enums.EventType;
+import com.sibanarayan.code.enums.RecordStatus;
+import com.sibanarayan.code.events.UserEvent;
+import com.sibanarayan.code.exceptions.EntityAlreadyExistException;
 import com.sibanarayan.submission.entities.UserSnapshot;
-import com.sibanarayan.submission.enums.EventType;
-import com.sibanarayan.submission.enums.RecordStatus;
-import com.sibanarayan.submission.events.UserEvent;
-import com.sibanarayan.submission.exceptions.EntityAlreadyExistException;
 import com.sibanarayan.submission.repositories.UserSnapshotRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -1,6 +1,6 @@
 package com.sibanarayan.submission.models.request;
 
-import com.sibanarayan.submission.enums.ProgrammingLanguage;
+import com.sibanarayan.code.enums.ProgrammingLanguage;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;

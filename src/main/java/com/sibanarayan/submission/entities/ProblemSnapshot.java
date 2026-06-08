@@ -1,10 +1,9 @@
 package com.sibanarayan.submission.entities;
 
-import com.sibanarayan.submission.enums.ProgrammingLanguage;
-import com.sibanarayan.submission.enums.RecordStatus;
+import com.sibanarayan.code.enums.ProgrammingLanguage;
+import com.sibanarayan.code.enums.RecordStatus;
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 

@@ -1,7 +1,7 @@
 package com.sibanarayan.submission.utility;
 
 
-import com.sibanarayan.submission.enums.UserRole;
+import com.sibanarayan.code.enums.UserRole;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;

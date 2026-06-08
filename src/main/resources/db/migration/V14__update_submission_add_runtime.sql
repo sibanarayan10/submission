@@ -1,0 +1,2 @@
+ALTER TABLE submission
+ADD COLUMN runtime_ms BIGINT DEFAULT 0;
