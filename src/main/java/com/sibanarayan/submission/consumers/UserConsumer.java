@@ -1,9 +1,10 @@
 package com.sibanarayan.submission.consumers;
 
-import com.sibanarayan.code.enums.EventType;
-import com.sibanarayan.code.enums.RecordStatus;
-import com.sibanarayan.code.events.UserEvent;
-import com.sibanarayan.code.exceptions.EntityAlreadyExistException;
+
+import com.sibanarayan.shared_package.enums.EventType;
+import com.sibanarayan.shared_package.enums.RecordStatus;
+import com.sibanarayan.shared_package.events.UserEvent;
+import com.sibanarayan.shared_package.exceptions.EntityAlreadyExistException;
 import com.sibanarayan.submission.entities.UserSnapshot;
 import com.sibanarayan.submission.repositories.UserSnapshotRepository;
 import lombok.AllArgsConstructor;
@@ -26,7 +27,7 @@ public class UserConsumer {
     )
     public void consume(UserEvent event){
         switch(event.getEventType()){
-            case  EventType.CREATE -> createUserSnapshot(event);
+            case EventType.CREATE -> createUserSnapshot(event);
             case EventType.DELETE -> deleteUserSnapshot(event);
         }
 

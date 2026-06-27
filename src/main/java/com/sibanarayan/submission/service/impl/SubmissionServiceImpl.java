@@ -1,9 +1,8 @@
 package com.sibanarayan.submission.service.impl;
 
-import com.sibanarayan.code.enums.RecordStatus;
-import com.sibanarayan.code.enums.SubmissionStatus;
-import com.sibanarayan.code.exceptions.ResourceNotFoundException;
 
+import com.sibanarayan.shared_package.enums.RecordStatus;
+import com.sibanarayan.shared_package.enums.SubmissionStatus;
 import com.sibanarayan.submission.entities.Submission;
 import com.sibanarayan.submission.events.SubmissionEvent;
 import com.sibanarayan.submission.models.request.SubmissionRequest;
@@ -14,6 +13,7 @@ import com.sibanarayan.submission.repositories.UserSnapshotRepository;
 import com.sibanarayan.submission.service.SubmissionService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.common.errors.ResourceNotFoundException;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
@@ -102,7 +102,7 @@ public class SubmissionServiceImpl implements SubmissionService {
   }
 
   private void validateProblem(UUID problemId){
-      if(!problemSnapshotRepository.existsByProblemIdAndRecordStatus(problemId,RecordStatus.ACTIVE)){
+      if(!problemSnapshotRepository.existsByProblemIdAndRecordStatus(problemId, RecordStatus.ACTIVE)){
           throw new ResourceNotFoundException("Problem not found");
       }
   }

@@ -1,7 +1,8 @@
 package com.sibanarayan.submission.consumers;
 
-import com.sibanarayan.code.enums.RecordStatus;
-import com.sibanarayan.code.events.ProblemEvent;
+
+import com.sibanarayan.shared_package.enums.RecordStatus;
+import com.sibanarayan.shared_package.events.ProblemEvent;
 import com.sibanarayan.submission.entities.ProblemSnapshot;
 import com.sibanarayan.submission.repositories.ProblemSnapshotRepository;
 import lombok.AllArgsConstructor;

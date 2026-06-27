@@ -1,7 +1,8 @@
 package com.sibanarayan.submission.entities;
 
-import com.sibanarayan.code.enums.ProgrammingLanguage;
-import com.sibanarayan.code.enums.SubmissionStatus;
+
+import com.sibanarayan.shared_package.enums.ProgrammingLanguage;
+import com.sibanarayan.shared_package.enums.SubmissionStatus;
 import jakarta.persistence.*;
 import lombok.*;
 

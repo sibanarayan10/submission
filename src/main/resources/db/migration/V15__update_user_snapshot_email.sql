@@ -1,0 +1,5 @@
+ALTER TABLE user_snapshot
+DROP COLUMN email,
+DROP COLUMN name,
+ADD COLUMN name VARCHAR(70),
+ADD COLUMN email VARCHAR(70);

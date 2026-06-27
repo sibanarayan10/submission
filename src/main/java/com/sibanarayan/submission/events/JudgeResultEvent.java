@@ -1,6 +1,5 @@
 package com.sibanarayan.submission.events;
 
-import com.sibanarayan.code.enums.SubmissionStatus;
 import lombok.*;
 
 import java.time.Instant;
@@ -13,7 +12,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class JudgeResultEvent {
     private UUID submissionId;
-    private SubmissionStatus status;
+    private com.sibanarayan.shared_package.enums.SubmissionStatus status;
     private Integer runtimeMs;
     private Integer memoryKb;
     private Integer passed;

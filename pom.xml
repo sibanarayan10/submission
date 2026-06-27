@@ -29,6 +29,12 @@
 	<properties>
 		<java.version>21</java.version>
 	</properties>
+	<repositories>
+		<repository>
+			<id>github</id>
+			<url>https://maven.pkg.github.com/sibanarayan10/shared-package</url>
+		</repository>
+	</repositories>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -113,8 +119,8 @@
 		</dependency>
 		<dependency>
 			<groupId>com.sibanarayan</groupId>
-			<artifactId>hii-coders</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<artifactId>shared-package</artifactId>
+			<version>1.0.3</version>
 		</dependency>
 	</dependencies>
 

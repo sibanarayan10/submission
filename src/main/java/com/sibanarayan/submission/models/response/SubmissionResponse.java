@@ -1,6 +1,6 @@
 package com.sibanarayan.submission.models.response;
 
-import com.sibanarayan.code.enums.SubmissionStatus;
+import com.sibanarayan.shared_package.enums.SubmissionStatus;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;

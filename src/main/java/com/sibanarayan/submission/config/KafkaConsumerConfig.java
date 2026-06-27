@@ -1,9 +1,9 @@
 package com.sibanarayan.submission.config;
 
+import com.sibanarayan.shared_package.events.ProblemEvent;
+import com.sibanarayan.shared_package.events.UserEvent;
 import com.sibanarayan.submission.events.JudgeResultEvent;
-import com.sibanarayan.submission.events.ProblemEvent;
 import com.sibanarayan.submission.events.SubmissionEvent;
-import com.sibanarayan.submission.events.UserEvent;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Autowired;

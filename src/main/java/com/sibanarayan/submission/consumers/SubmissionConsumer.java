@@ -1,6 +1,6 @@
 package com.sibanarayan.submission.consumers;
 
-import com.sibanarayan.code.enums.SubmissionStatus;
+import com.sibanarayan.shared_package.enums.SubmissionStatus;
 import com.sibanarayan.submission.entities.Submission;
 import com.sibanarayan.submission.events.JudgeResultEvent;
 import com.sibanarayan.submission.events.SubmissionEvent;

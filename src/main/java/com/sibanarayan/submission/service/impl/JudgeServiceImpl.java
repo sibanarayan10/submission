@@ -1,8 +1,9 @@
 package com.sibanarayan.submission.service.impl;
 
-import com.sibanarayan.code.enums.ProgrammingLanguage;
-import com.sibanarayan.code.enums.RecordStatus;
-import com.sibanarayan.code.enums.SubmissionStatus;
+
+import com.sibanarayan.shared_package.enums.ProgrammingLanguage;
+import com.sibanarayan.shared_package.enums.RecordStatus;
+import com.sibanarayan.shared_package.enums.SubmissionStatus;
 import com.sibanarayan.submission.config.container.ContainerPoolManager;
 import com.sibanarayan.submission.config.container.DockerExecutor;
 import com.sibanarayan.submission.entities.Submission;
@@ -31,7 +32,7 @@ import java.util.UUID;
 public class JudgeServiceImpl {
 
     private final DockerExecutor dockerExecutor;
-    private final ContainerPoolManager poolManager;          // ← replaces direct DockerExecutor for lifecycle
+    private final ContainerPoolManager poolManager;
     private final ProblemSnapshotRepository problemSnapshotRepository;
     private final SimpMessagingTemplate simpMessagingTemplate;
 
@@ -43,7 +44,6 @@ public class JudgeServiceImpl {
         String containerId = null;
 
         try {
-            // 1. Build full source: user solution + ioByLanguage harness
             StringBuilder source = new StringBuilder(event.getSolution());
             problemSnapshotRepository
                     .findByProblemIdAndRecordStatus(event.getProblemId(), RecordStatus.ACTIVE)
@@ -52,21 +52,13 @@ public class JudgeServiceImpl {
                         if (harness != null) source.append(harness);
                     });
 
-            // 2. Write to temp file
             codeFile = createTempFile(source.toString(), language);
 
-            // 3. Borrow a pre-warmed container (blocks until one is free or timeout)
-            //    PoolTimeoutException is caught below and mapped to RUNTIME_ERROR
             containerId = poolManager.borrow(language);
             log.info("Borrowed container {} for submission {}", containerId, event.getSubmissionId());
-
-            // 4. Copy code into container
             dockerExecutor.copyFile(containerId, codeFile, language);
-
-            // 5. Compile (Java only)
             dockerExecutor.compile(containerId, language);
 
-            // 6. Run test cases SEQUENTIALLY — fail fast on first failure
             for (int i = 0; i < testCases.size(); i++) {
                 TestCaseResponse tc = testCases.get(i);
 
@@ -75,7 +67,6 @@ public class JudgeServiceImpl {
 
                 ExecutionResult result = dockerExecutor.executeFile(containerId, language, tc.getInputData());
 
-                // TLE
                 if (result.isTle()) {
                     return buildResult(event.getSubmissionId(),
                             SubmissionStatus.TIME_LIMIT_EXCEEDED,
@@ -84,7 +75,6 @@ public class JudgeServiceImpl {
                             "Time limit exceeded on test case " + (i + 1));
                 }
 
-                // Runtime error
                 if (result.getExitCode() != 0) {
                     return buildResult(event.getSubmissionId(),
                             SubmissionStatus.RUNTIME_ERROR,
@@ -93,7 +83,6 @@ public class JudgeServiceImpl {
                             result.getStderr());
                 }
 
-                // Wrong answer
                 String actual   = normalize(result.getStdout().trim());
                 String expected = normalize(tc.getExpectedOutput().trim());
                 if (!actual.equals(expected)) {
@@ -104,13 +93,12 @@ public class JudgeServiceImpl {
                             "Test case " + (i + 1) + " failed. Expected: " + expected + ", Got: " + actual);
                 }
 
-                // Push live progress over WebSocket — no sleep needed
                 pushProgress(event.getSubmissionId(), event.getProblemId(), i + 1, testCases.size());
             }
 
             return buildResult(event.getSubmissionId(),
                     SubmissionStatus.ACCEPTED,
-                    0, null,          // runtimeMs: compute real value if needed
+                    0, null,
                     testCases.size(), testCases.size(),
                     null);
 
@@ -129,11 +117,9 @@ public class JudgeServiceImpl {
                     "Internal error: " + e.getMessage());
 
         } finally {
-            // Always clean up temp file
             if (codeFile != null) {
                 try { Files.deleteIfExists(codeFile.toPath()); } catch (Exception ignored) {}
             }
-            // Always return container to pool — cleanup of /app happens inside returnContainer
             if (containerId != null) {
                 poolManager.returnContainer(language, containerId);
                 log.info("Returned container {} for submission {}", containerId, event.getSubmissionId());

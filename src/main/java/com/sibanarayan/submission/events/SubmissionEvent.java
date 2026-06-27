@@ -1,6 +1,6 @@
 package com.sibanarayan.submission.events;
 
-import com.sibanarayan.code.enums.ProgrammingLanguage;
+import com.sibanarayan.shared_package.enums.ProgrammingLanguage;
 import lombok.*;
 
 import java.util.UUID;

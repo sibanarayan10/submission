@@ -1,6 +1,7 @@
 package com.sibanarayan.submission.consumers;
 
-import com.sibanarayan.code.events.SubmissionResultEvent;
+
+import com.sibanarayan.shared_package.events.SubmissionResultEvent;
 import com.sibanarayan.submission.events.JudgeResultEvent;
 import com.sibanarayan.submission.repositories.SubmissionRepositories;
 import lombok.RequiredArgsConstructor;
